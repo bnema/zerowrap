@@ -21,24 +21,24 @@ const (
 )
 
 // FromCtxWithField returns a logger with one additional field.
-func FromCtxWithField(ctx context.Context, key string, value any) zerolog.Logger {
-	return addToContext(FromCtx(ctx).With(), key, value).Logger()
+func FromCtxWithField(ctx context.Context, key string, value any) Logger {
+	return Logger{addToContext(FromCtx(ctx).With(), key, value).Logger()}
 }
 
 // FromCtxWithFields returns a logger with multiple additional fields.
-func FromCtxWithFields(ctx context.Context, fields map[string]any) zerolog.Logger {
+func FromCtxWithFields(ctx context.Context, fields map[string]any) Logger {
 	log := FromCtx(ctx)
 	c := log.With()
 	for k, v := range fields {
 		c = addToContext(c, k, v)
 	}
-	return c.Logger()
+	return Logger{c.Logger()}
 }
 
 // FromCtxWithStruct returns a logger with fields extracted from struct tags.
 // Uses `log` struct tag for field names, falls back to `json` tag, then field name.
 // Fields tagged with "-" are skipped.
-func FromCtxWithStruct(ctx context.Context, s any) zerolog.Logger {
+func FromCtxWithStruct(ctx context.Context, s any) Logger {
 	fields := extractFields(s)
 	return FromCtxWithFields(ctx, fields)
 }

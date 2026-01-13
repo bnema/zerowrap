@@ -56,8 +56,8 @@ type FileConfig struct {
 	Compress bool
 }
 
-// New creates a new zerolog.Logger with the given configuration.
-func New(cfg Config) zerolog.Logger {
+// New creates a new Logger with the given configuration.
+func New(cfg Config) Logger {
 	output := cfg.Output
 	if output == nil {
 		output = os.Stderr
@@ -88,13 +88,13 @@ func New(cfg Config) zerolog.Logger {
 		logger = logger.With().Caller().Logger()
 	}
 
-	return logger
+	return Logger{logger}
 }
 
 // NewFromEnv creates a logger configured from environment variables.
 // Uses {prefix}_LOG_LEVEL and {prefix}_LOG_FORMAT.
 // Example: with prefix "MYAPP", reads MYAPP_LOG_LEVEL and MYAPP_LOG_FORMAT.
-func NewFromEnv(prefix string) zerolog.Logger {
+func NewFromEnv(prefix string) Logger {
 	level := os.Getenv(prefix + "_LOG_LEVEL")
 	format := os.Getenv(prefix + "_LOG_FORMAT")
 	return New(Config{
@@ -104,7 +104,7 @@ func NewFromEnv(prefix string) zerolog.Logger {
 }
 
 // Default returns a sensible default logger writing to stderr with console format.
-func Default() zerolog.Logger {
+func Default() Logger {
 	return New(Config{
 		Level:  "info",
 		Format: "console",
@@ -114,7 +114,7 @@ func Default() zerolog.Logger {
 // NewWithFile creates a logger that writes to both stderr and a file.
 // Returns the logger, a cleanup function that must be called to close the file,
 // and any error encountered.
-func NewWithFile(cfg Config, fileCfg FileConfig) (zerolog.Logger, func(), error) {
+func NewWithFile(cfg Config, fileCfg FileConfig) (Logger, func(), error) {
 	if !fileCfg.Enabled || fileCfg.Path == "" {
 		return New(cfg), func() {}, nil
 	}
@@ -186,12 +186,12 @@ func NewWithFile(cfg Config, fileCfg FileConfig) (zerolog.Logger, func(), error)
 		logger = logger.With().Caller().Logger()
 	}
 
-	return logger, cleanup, nil
+	return Logger{logger}, cleanup, nil
 }
 
 // WithHook returns a new logger with the hook attached.
-func WithHook(log zerolog.Logger, hook zerolog.Hook) zerolog.Logger {
-	return log.Hook(hook)
+func WithHook(log Logger, hook zerolog.Hook) Logger {
+	return Logger{log.Hook(hook)}
 }
 
 // parseLevel converts a level string to zerolog.Level.

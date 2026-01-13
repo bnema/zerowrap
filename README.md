@@ -25,24 +25,24 @@ import (
 )
 
 func main() {
-    // Create a logger
-    log := zerowrap.New(zerowrap.Config{
+    // Create a logger and attach to context
+    logger := zerowrap.New(zerowrap.Config{
         Level:  "debug",
         Format: "console",
     })
-
-    // Attach to context
-    ctx := zerowrap.WithCtx(context.Background(), log)
+    ctx := zerowrap.WithCtx(context.Background(), logger)
 
     // Use throughout your application
-    zerowrap.FromCtx(ctx).Info().Msg("hello world")
+    log := zerowrap.FromCtx(ctx)
+    log.Info().Msg("hello world")
 
     // Pass context to other functions
     doSomething(ctx)
 }
 
 func doSomething(ctx context.Context) {
-    zerowrap.FromCtx(ctx).Debug().Msg("doing something")
+    log := zerowrap.FromCtx(ctx)
+    log.Debug().Msg("doing something")
 }
 ```
 
@@ -54,6 +54,7 @@ func doSomething(ctx context.Context) {
 - File-based logging with rotation support (via lumberjack)
 - OpenTelemetry log bridging (optional sub-package)
 - Common field name constants for consistency
+- Error helpers for logging and returning errors in one line
 
 ## API Reference
 
@@ -86,15 +87,24 @@ func doSomething(ctx context.Context) {
 | `Default()` | Create default logger (info level, console format) |
 | `WithHook(log, hook)` | Add hook to logger |
 
+### Error Helpers (Logger methods)
+
+| Method | Description |
+|--------|-------------|
+| `log.WrapErr(err, msg)` | Log and wrap error with message |
+| `log.WrapErrWithFields(err, msg, fields)` | Log and wrap error with fields |
+| `log.WrapErrf(err, format, args...)` | Log and wrap error with formatted message |
+
 ## Usage Examples
 
 ### Basic Logging with Context
 
 ```go
-log := zerowrap.Default()
-ctx := zerowrap.WithCtx(context.Background(), log)
+logger := zerowrap.Default()
+ctx := zerowrap.WithCtx(context.Background(), logger)
 
-zerowrap.FromCtx(ctx).Info().Str("action", "start").Msg("application started")
+log := zerowrap.FromCtx(ctx)
+log.Info().Str("action", "start").Msg("application started")
 ```
 
 ### Adding Fields
@@ -184,6 +194,52 @@ defer cleanup()
 
 ctx := zerowrap.WithCtx(context.Background(), log)
 // Logs go to both console (formatted) and file (JSON)
+```
+
+### Error Handling
+
+Log and return errors in one line using Logger methods:
+
+```go
+func connectDB(ctx context.Context) error {
+    log := zerowrap.FromCtx(ctx)
+
+    db, err := sql.Open("postgres", connStr)
+    if err != nil {
+        return log.WrapErr(err, "failed to open database")
+    }
+
+    if err := db.Ping(); err != nil {
+        return log.WrapErr(err, "database ping failed")
+    }
+
+    return nil
+}
+
+// With fields
+func queryUser(ctx context.Context, userID int) (*User, error) {
+    log := zerowrap.FromCtx(ctx)
+
+    user, err := db.GetUser(userID)
+    if err != nil {
+        return nil, log.WrapErrWithFields(err, "user query failed", map[string]any{
+            "user_id": userID,
+        })
+    }
+    return user, nil
+}
+
+// With formatted message
+func connectToHost(ctx context.Context, host string) error {
+    log := zerowrap.FromCtx(ctx)
+
+    conn, err := net.Dial("tcp", host)
+    if err != nil {
+        return log.WrapErrf(err, "failed to connect to %s", host)
+    }
+    defer conn.Close()
+    return nil
+}
 ```
 
 ### OpenTelemetry Integration

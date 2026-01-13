@@ -5,20 +5,20 @@
 //   - Adding fields to loggers (single, multiple, or from structs)
 //   - Creating configured loggers with sensible defaults
 //   - File-based logging with rotation support
+//   - Error helpers for logging and returning errors
 //
 // # Basic Usage
 //
-//	// Create a logger
-//	log := zerowrap.New(zerowrap.Config{
+//	// Create a logger and attach to context
+//	logger := zerowrap.New(zerowrap.Config{
 //	    Level:  "debug",
 //	    Format: "console",
 //	})
-//
-//	// Attach to context
-//	ctx := zerowrap.WithCtx(context.Background(), log)
+//	ctx := zerowrap.WithCtx(context.Background(), logger)
 //
 //	// Use throughout your application
-//	zerowrap.FromCtx(ctx).Info().Msg("hello world")
+//	log := zerowrap.FromCtx(ctx)
+//	log.Info().Msg("hello world")
 //
 // # Adding Fields
 //
@@ -50,11 +50,30 @@
 //	zerowrap.FieldError      // "error"
 //	zerowrap.FieldDuration   // "duration_ms"
 //
+// # Error Helpers
+//
+// Log and return wrapped errors in one line using Logger methods:
+//
+//	func doSomething(ctx context.Context) error {
+//	    log := zerowrap.FromCtx(ctx)
+//
+//	    if err != nil {
+//	        return log.WrapErr(err, "failed to connect")
+//	    }
+//
+//	    // With fields
+//	    if err != nil {
+//	        return log.WrapErrWithFields(err, "query failed", map[string]any{
+//	            "table": tableName,
+//	        })
+//	    }
+//	}
+//
 // # OpenTelemetry Integration
 //
 // For OpenTelemetry log bridging, use the optional otel sub-package:
 //
 //	import "github.com/bnema/zerowrap/otel"
 //
-//	log := zerowrap.New(cfg).Hook(otel.NewOTelHook("my-service"))
+//	log := zerowrap.New(cfg).Hook(otel.NewHook("my-service"))
 package zerowrap
