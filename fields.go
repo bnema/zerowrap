@@ -11,13 +11,36 @@ import (
 
 // Common field name constants for consistent logging across applications.
 const (
-	FieldComponent = "component"
-	FieldRequestID = "request_id"
-	FieldTraceID   = "trace_id"
-	FieldSpanID    = "span_id"
-	FieldUserID    = "user_id"
+	// Identity & Tracing
+	FieldComponent     = "component"
+	FieldRequestID     = "request_id"
+	FieldTraceID       = "trace_id"
+	FieldSpanID        = "span_id"
+	FieldCorrelationID = "correlation_id"
+	FieldSessionID     = "session_id"
+	FieldUserID        = "user_id"
+
+	// HTTP/API
+	FieldMethod   = "method"
+	FieldPath     = "path"
+	FieldStatus   = "status"
+	FieldClientIP = "client_ip"
+
+	// Service/Infra
+	FieldService = "service"
+	FieldVersion = "version"
+	FieldHost    = "host"
+	FieldEnv     = "env"
+
+	// Operations
+	FieldAction    = "action"
+	FieldOperation = "operation"
 	FieldError     = "error"
 	FieldDuration  = "duration_ms"
+
+	// Data
+	FieldCount = "count"
+	FieldSize  = "size_bytes"
 )
 
 // FromCtxWithField returns a logger with one additional field.

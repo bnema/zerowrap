@@ -266,13 +266,36 @@ ctx := zerowrap.WithCtx(context.Background(), log)
 Common field names for consistency across your application:
 
 ```go
-zerowrap.FieldComponent  // "component"
-zerowrap.FieldRequestID  // "request_id"
-zerowrap.FieldTraceID    // "trace_id"
-zerowrap.FieldSpanID     // "span_id"
-zerowrap.FieldUserID     // "user_id"
+// Identity & Tracing
+zerowrap.FieldComponent      // "component"
+zerowrap.FieldRequestID      // "request_id"
+zerowrap.FieldTraceID        // "trace_id"
+zerowrap.FieldSpanID         // "span_id"
+zerowrap.FieldCorrelationID  // "correlation_id"
+zerowrap.FieldSessionID      // "session_id"
+zerowrap.FieldUserID         // "user_id"
+
+// HTTP/API
+zerowrap.FieldMethod    // "method"
+zerowrap.FieldPath      // "path"
+zerowrap.FieldStatus    // "status"
+zerowrap.FieldClientIP  // "client_ip"
+
+// Service/Infra
+zerowrap.FieldService  // "service"
+zerowrap.FieldVersion  // "version"
+zerowrap.FieldHost     // "host"
+zerowrap.FieldEnv      // "env"
+
+// Operations
+zerowrap.FieldAction     // "action"
+zerowrap.FieldOperation  // "operation"
 zerowrap.FieldError      // "error"
 zerowrap.FieldDuration   // "duration_ms"
+
+// Data
+zerowrap.FieldCount  // "count"
+zerowrap.FieldSize   // "size_bytes"
 ```
 
 Usage:

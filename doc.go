@@ -42,13 +42,21 @@
 //
 // The package provides common field name constants for consistency:
 //
-//	zerowrap.FieldComponent  // "component"
-//	zerowrap.FieldRequestID  // "request_id"
-//	zerowrap.FieldTraceID    // "trace_id"
-//	zerowrap.FieldSpanID     // "span_id"
-//	zerowrap.FieldUserID     // "user_id"
-//	zerowrap.FieldError      // "error"
-//	zerowrap.FieldDuration   // "duration_ms"
+//	// Identity & Tracing
+//	zerowrap.FieldComponent, FieldRequestID, FieldTraceID, FieldSpanID
+//	zerowrap.FieldCorrelationID, FieldSessionID, FieldUserID
+//
+//	// HTTP/API
+//	zerowrap.FieldMethod, FieldPath, FieldStatus, FieldClientIP
+//
+//	// Service/Infra
+//	zerowrap.FieldService, FieldVersion, FieldHost, FieldEnv
+//
+//	// Operations
+//	zerowrap.FieldAction, FieldOperation, FieldError, FieldDuration
+//
+//	// Data
+//	zerowrap.FieldCount, FieldSize
 //
 // # Error Helpers
 //
