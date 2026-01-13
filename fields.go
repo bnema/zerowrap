@@ -41,6 +41,33 @@ const (
 	// Data
 	FieldCount = "count"
 	FieldSize  = "size_bytes"
+
+	// Clean Architecture - Layers
+	FieldLayer   = "layer"   // domain, usecase, adapter
+	FieldUseCase = "usecase" // e.g., "CreateUser", "GetOrder"
+
+	// Clean Architecture - Adapters
+	FieldAdapter     = "adapter"      // e.g., "http", "grpc", "postgres"
+	FieldAdapterType = "adapter_type" // "in" (driving) or "out" (driven)
+	FieldHandler     = "handler"      // HTTP/gRPC handler name
+	FieldRepository  = "repository"   // repository name
+	FieldGateway     = "gateway"      // external service gateway
+
+	// Database/Storage
+	FieldTable    = "table"
+	FieldQuery    = "query"
+	FieldDatabase = "database"
+
+	// Messaging/Events
+	FieldEvent   = "event"
+	FieldTopic   = "topic"
+	FieldQueue   = "queue"
+	FieldPayload = "payload"
+
+	// Entity/Resource
+	FieldEntity     = "entity"      // e.g., "user", "order"
+	FieldEntityID   = "entity_id"   // ID of the entity being operated on
+	FieldEntityType = "entity_type" // type of entity
 )
 
 // FromCtxWithField returns a logger with one additional field.

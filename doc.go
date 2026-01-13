@@ -140,35 +140,35 @@
 // Common field names for consistency:
 //
 //	// Identity & Tracing
-//	FieldComponent     = "component"
-//	FieldRequestID     = "request_id"
-//	FieldTraceID       = "trace_id"
-//	FieldSpanID        = "span_id"
-//	FieldCorrelationID = "correlation_id"
-//	FieldSessionID     = "session_id"
-//	FieldUserID        = "user_id"
+//	FieldComponent, FieldRequestID, FieldTraceID, FieldSpanID
+//	FieldCorrelationID, FieldSessionID, FieldUserID
 //
 //	// HTTP/API
-//	FieldMethod   = "method"
-//	FieldPath     = "path"
-//	FieldStatus   = "status"
-//	FieldClientIP = "client_ip"
+//	FieldMethod, FieldPath, FieldStatus, FieldClientIP
 //
 //	// Service/Infra
-//	FieldService = "service"
-//	FieldVersion = "version"
-//	FieldHost    = "host"
-//	FieldEnv     = "env"
+//	FieldService, FieldVersion, FieldHost, FieldEnv
 //
 //	// Operations
-//	FieldAction    = "action"
-//	FieldOperation = "operation"
-//	FieldError     = "error"
-//	FieldDuration  = "duration_ms"
+//	FieldAction, FieldOperation, FieldError, FieldDuration
 //
 //	// Data
-//	FieldCount = "count"
-//	FieldSize  = "size_bytes"
+//	FieldCount, FieldSize
+//
+//	// Clean Architecture - Layers
+//	FieldLayer, FieldUseCase
+//
+//	// Clean Architecture - Adapters
+//	FieldAdapter, FieldAdapterType, FieldHandler, FieldRepository, FieldGateway
+//
+//	// Database/Storage
+//	FieldTable, FieldQuery, FieldDatabase
+//
+//	// Messaging/Events
+//	FieldEvent, FieldTopic, FieldQueue, FieldPayload
+//
+//	// Entity/Resource
+//	FieldEntity, FieldEntityID, FieldEntityType
 //
 // Usage:
 //

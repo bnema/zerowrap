@@ -296,6 +296,33 @@ zerowrap.FieldDuration   // "duration_ms"
 // Data
 zerowrap.FieldCount  // "count"
 zerowrap.FieldSize   // "size_bytes"
+
+// Clean Architecture - Layers
+zerowrap.FieldLayer    // "layer" (domain, usecase, adapter)
+zerowrap.FieldUseCase  // "usecase" (e.g., "CreateUser")
+
+// Clean Architecture - Adapters
+zerowrap.FieldAdapter      // "adapter" (http, grpc, postgres)
+zerowrap.FieldAdapterType  // "adapter_type" (in/out)
+zerowrap.FieldHandler      // "handler"
+zerowrap.FieldRepository   // "repository"
+zerowrap.FieldGateway      // "gateway"
+
+// Database/Storage
+zerowrap.FieldTable     // "table"
+zerowrap.FieldQuery     // "query"
+zerowrap.FieldDatabase  // "database"
+
+// Messaging/Events
+zerowrap.FieldEvent    // "event"
+zerowrap.FieldTopic    // "topic"
+zerowrap.FieldQueue    // "queue"
+zerowrap.FieldPayload  // "payload"
+
+// Entity/Resource
+zerowrap.FieldEntity      // "entity"
+zerowrap.FieldEntityID    // "entity_id"
+zerowrap.FieldEntityType  // "entity_type"
 ```
 
 Usage:
