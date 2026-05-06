@@ -171,7 +171,7 @@ func NewWithFile(cfg Config, fileCfg FileConfig) (Logger, func(), error) {
 	}
 
 	if appManaged {
-		if err := os.MkdirAll(filepath.Dir(filePath), 0o755); err != nil {
+		if err := os.MkdirAll(filepath.Dir(filePath), 0o750); err != nil {
 			return Logger{}, func() {}, fmt.Errorf("create log directory: %w", err)
 		}
 	}

@@ -130,6 +130,9 @@ func defaultLogRoot(appName string) (string, error) {
 }
 
 func validateComponent(s, fieldName string) error {
+	if strings.TrimSpace(s) == "" {
+		return fmt.Errorf("%s must not be empty or whitespace", fieldName)
+	}
 	if s == "." || s == ".." {
 		return fmt.Errorf("%s must not be %q", fieldName, s)
 	}

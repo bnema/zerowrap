@@ -1,7 +1,6 @@
 package zerowrap
 
 import (
-	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -151,6 +150,22 @@ func TestResolveLogPathRejectsPathSeparators(t *testing.T) {
 	if !strings.Contains(err.Error(), "AppName") {
 		t.Fatalf("error should mention AppName, got: %v", err)
 	}
+
+	_, err = ResolveLogPath(FileConfig{AppName: " \t"})
+	if err == nil {
+		t.Fatal("expected error for whitespace AppName")
+	}
+	if !strings.Contains(err.Error(), "AppName") {
+		t.Fatalf("error should mention AppName, got: %v", err)
+	}
+
+	_, err = ResolveLogPath(FileConfig{AppName: "MyApp", Name: " \t"})
+	if err == nil {
+		t.Fatal("expected error for whitespace Name")
+	}
+	if !strings.Contains(err.Error(), "Name") {
+		t.Fatalf("error should mention Name, got: %v", err)
+	}
 }
 
 func TestResolveLogPathRejectsInvalidModeAndFormat(t *testing.T) {
@@ -283,5 +298,4 @@ func TestResolveLogPathDefaultRootIsNotEmpty(t *testing.T) {
 	if !strings.HasSuffix(p, ".log") {
 		t.Fatalf("path should end with .log, got %q", p)
 	}
-	_ = os.Getenv // ensure os is used
 }
