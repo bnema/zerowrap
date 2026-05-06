@@ -51,7 +51,7 @@ func doSomething(ctx context.Context) {
 - Context-based logger storage and retrieval
 - Add fields to loggers (single, multiple, or from structs)
 - Configurable logger creation with sensible defaults
-- File-based logging with rotation support (via lumberjack)
+- File-based logging with rotation support and app-managed log paths
 - OpenTelemetry log bridging (optional sub-package)
 - Common field name constants for consistency
 - Error helpers for logging and returning errors in one line
@@ -241,6 +241,61 @@ func connectToHost(ctx context.Context, host string) error {
     return nil
 }
 ```
+
+### App-Managed File Logging
+
+When you don't want to hard-code a full file path, set `AppName` and let zerowrap
+choose the correct OS-specific log directory:
+
+```go
+fileCfg := zerowrap.FileConfig{
+    Enabled:    true,
+    AppName:    "MyApp",
+    Mode:       zerowrap.FileModeSession,
+    FileFormat: zerowrap.FileFormatConsole,
+}
+
+// Inspect the resolved path without creating a logger
+path, err := zerowrap.ResolveLogPath(fileCfg)
+if err != nil {
+    panic(err)
+}
+fmt.Println("Log file:", path)
+
+log, cleanup, err := zerowrap.NewWithFile(
+    zerowrap.Config{Level: "debug", Format: "console"},
+    fileCfg,
+)
+if err != nil {
+    panic(err)
+}
+defer cleanup()
+```
+
+**Default OS locations** (when no `BaseDir` override is supplied):
+
+| OS | Log root |
+|----|----------|
+| macOS | `~/Library/Logs/<AppName>/` |
+| Linux | `$XDG_STATE_HOME/<AppName>/logs/` or `~/.local/state/<AppName>/logs/` |
+| Windows | `%LOCALAPPDATA%\<AppName>\Logs\` |
+
+**Modes**
+
+| Constant | Behavior |
+|----------|----------|
+| `FileModeSingle` | Writes to `<root>/app.log` (or `<root>/<Name>.log`). All runs share the same file. |
+| `FileModeSession` | Writes to `<root>/sessions/<session-id>/app.log`. Each process generates a unique session directory that is shared across all loggers in that process. |
+
+**File formats**
+
+| Constant | Description |
+|----------|-------------|
+| `FileFormatJSON` | JSON lines (default). Best for ingestion and log aggregation. |
+| `FileFormatConsole` | Human-readable text without ANSI colors. Useful for local apps, CLI tools, and support logs. |
+
+When both `Path` and `AppName` are set, `Path` takes priority. Set `BaseDir` to
+relocate the app root while keeping the standard layout.
 
 ### OpenTelemetry Integration
 
