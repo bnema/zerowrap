@@ -1,8 +1,10 @@
 package zerowrap
 
 import (
+	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -32,13 +34,52 @@ type Config struct {
 	Caller bool
 }
 
+// FileMode controls how app-managed log file paths are laid out.
+type FileMode string
+
+const (
+	// FileModeSingle writes to one stable file under the app log directory.
+	FileModeSingle FileMode = "single"
+
+	// FileModeSession writes under a process-level session directory.
+	FileModeSession FileMode = "session"
+)
+
+// FileFormat controls the format used for the file writer.
+type FileFormat string
+
+const (
+	// FileFormatJSON writes JSON lines to the log file.
+	FileFormatJSON FileFormat = "json"
+
+	// FileFormatConsole writes human-readable console output to the log file.
+	FileFormatConsole FileFormat = "console"
+)
+
 // FileConfig holds configuration for file-based logging.
+// Use keyed fields when constructing FileConfig values; unkeyed composite
+// literals are not supported as this exported configuration struct may grow.
 type FileConfig struct {
 	// Enabled toggles file logging on/off.
 	Enabled bool
 
-	// Path is the log file path.
+	// Path is the full log file path. If set, it takes priority over app-managed path fields.
 	Path string
+
+	// AppName enables app-managed log paths when Path is empty.
+	AppName string
+
+	// BaseDir overrides the app-managed root directory before AppName.
+	BaseDir string
+
+	// Name is the log file name. Defaults to "app". The .log extension is added if missing.
+	Name string
+
+	// Mode controls app-managed file layout. Defaults to FileModeSingle.
+	Mode FileMode
+
+	// FileFormat controls the file output format. Defaults to FileFormatJSON.
+	FileFormat FileFormat
 
 	// MaxSize is the maximum size in megabytes before rotation.
 	// Defaults to 100 MB if 0.
@@ -115,8 +156,26 @@ func Default() Logger {
 // Returns the logger, a cleanup function that must be called to close the file,
 // and any error encountered.
 func NewWithFile(cfg Config, fileCfg FileConfig) (Logger, func(), error) {
-	if !fileCfg.Enabled || fileCfg.Path == "" {
+	if !fileCfg.Enabled || (fileCfg.Path == "" && fileCfg.AppName == "") {
 		return New(cfg), func() {}, nil
+	}
+
+	fileFormat, err := normalizeFileFormat(fileCfg.FileFormat)
+	if err != nil {
+		return Logger{}, func() {}, fmt.Errorf("file format: %w", err)
+	}
+
+	appManaged := fileCfg.Path == "" && fileCfg.AppName != ""
+
+	filePath, err := ResolveLogPath(fileCfg)
+	if err != nil {
+		return Logger{}, func() {}, fmt.Errorf("resolve log path: %w", err)
+	}
+
+	if appManaged {
+		if err := os.MkdirAll(filepath.Dir(filePath), 0o750); err != nil {
+			return Logger{}, func() {}, fmt.Errorf("create log directory: %w", err)
+		}
 	}
 
 	// Set defaults for file config
@@ -134,7 +193,7 @@ func NewWithFile(cfg Config, fileCfg FileConfig) (Logger, func(), error) {
 	}
 
 	fileWriter := &lumberjack.Logger{
-		Filename:   fileCfg.Path,
+		Filename:   filePath,
 		MaxSize:    maxSize,
 		MaxBackups: maxBackups,
 		MaxAge:     maxAge,
@@ -156,7 +215,7 @@ func NewWithFile(cfg Config, fileCfg FileConfig) (Logger, func(), error) {
 		timeFormat = time.RFC3339
 	}
 
-	// Create multi-writer: console (formatted) + file (JSON)
+	// Create multi-writer: console (formatted) + file (respects FileFormat)
 	var writers []io.Writer
 
 	format := strings.ToLower(cfg.Format)
@@ -169,8 +228,16 @@ func NewWithFile(cfg Config, fileCfg FileConfig) (Logger, func(), error) {
 		writers = append(writers, consoleOutput)
 	}
 
-	// File always gets JSON format for easy parsing
-	writers = append(writers, fileWriter)
+	// File output respects FileFormat: JSON by default, or console (human-readable, no-color).
+	fileOutput := io.Writer(fileWriter)
+	if fileFormat == FileFormatConsole {
+		fileOutput = zerolog.ConsoleWriter{
+			Out:        fileWriter,
+			TimeFormat: timeFormat,
+			NoColor:    true,
+		}
+	}
+	writers = append(writers, fileOutput)
 
 	multiWriter := zerolog.MultiLevelWriter(writers...)
 
