@@ -57,6 +57,8 @@ const (
 )
 
 // FileConfig holds configuration for file-based logging.
+// Use keyed fields when constructing FileConfig values; unkeyed composite
+// literals are not supported as this exported configuration struct may grow.
 type FileConfig struct {
 	// Enabled toggles file logging on/off.
 	Enabled bool

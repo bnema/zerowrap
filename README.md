@@ -285,7 +285,7 @@ defer cleanup()
 | Constant | Behavior |
 |----------|----------|
 | `FileModeSingle` | Writes to `<root>/app.log` (or `<root>/<Name>.log`). All runs share the same file. |
-| `FileModeSession` | Writes to `<root>/sessions/<session-id>/app.log`. Each process generates a unique session directory that is shared across all loggers in that process. |
+| `FileModeSession` | Writes to `<root>/sessions/<session-id>/<Name>.log` (default `app.log`). Each process generates a unique session directory that is shared across all loggers in that process. |
 
 **File formats**
 
@@ -297,6 +297,10 @@ defer cleanup()
 When both `Path` and `AppName` are set, `Path` takes priority. Set `BaseDir` to
 relocate the app root while keeping the standard layout. For example,
 `BaseDir: "/tmp"` with `AppName: "MyApp"` resolves under `/tmp/MyApp/logs/`.
+
+Compatibility note: `FileConfig` is intended to be used with keyed fields. This
+release adds fields to `FileConfig`, so callers using unkeyed composite literals
+should switch to keyed literals.
 
 ### OpenTelemetry Integration
 

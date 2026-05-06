@@ -99,7 +99,9 @@
 //
 // # FileConfig
 //
-// Configuration for file-based logging with rotation and app-managed paths:
+// Configuration for file-based logging with rotation and app-managed paths.
+// Use keyed fields when constructing FileConfig values; unkeyed composite
+// literals are not supported as this exported configuration struct may grow:
 //
 //	type FileConfig struct {
 //	    Enabled    bool       // toggle file logging

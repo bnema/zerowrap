@@ -71,8 +71,7 @@ func ResolveLogPath(fileCfg FileConfig) (string, error) {
 		return "", fmt.Errorf("invalid FileMode: %q (must be %q or %q)", mode, FileModeSingle, FileModeSession)
 	}
 
-	_, err := normalizeFileFormat(fileCfg.FileFormat)
-	if err != nil {
+	if err := validateFileFormat(fileCfg.FileFormat); err != nil {
 		return "", err
 	}
 
@@ -140,6 +139,11 @@ func validateComponent(s, fieldName string) error {
 		return fmt.Errorf("%s must not contain path separators, got %q", fieldName, s)
 	}
 	return nil
+}
+
+func validateFileFormat(f FileFormat) error {
+	_, err := normalizeFileFormat(f)
+	return err
 }
 
 // normalizeFileFormat validates and defaults the FileFormat value.
