@@ -32,13 +32,50 @@ type Config struct {
 	Caller bool
 }
 
+// FileMode controls how app-managed log file paths are laid out.
+type FileMode string
+
+const (
+	// FileModeSingle writes to one stable file under the app log directory.
+	FileModeSingle FileMode = "single"
+
+	// FileModeSession writes under a process-level session directory.
+	FileModeSession FileMode = "session"
+)
+
+// FileFormat controls the format used for the file writer.
+type FileFormat string
+
+const (
+	// FileFormatJSON writes JSON lines to the log file.
+	FileFormatJSON FileFormat = "json"
+
+	// FileFormatConsole writes human-readable console output to the log file.
+	FileFormatConsole FileFormat = "console"
+)
+
 // FileConfig holds configuration for file-based logging.
 type FileConfig struct {
 	// Enabled toggles file logging on/off.
 	Enabled bool
 
-	// Path is the log file path.
+	// Path is the full log file path. If set, it takes priority over app-managed path fields.
 	Path string
+
+	// AppName enables app-managed log paths when Path is empty.
+	AppName string
+
+	// BaseDir overrides the app-managed root directory before AppName.
+	BaseDir string
+
+	// Name is the log file name. Defaults to "app". The .log extension is added if missing.
+	Name string
+
+	// Mode controls app-managed file layout. Defaults to FileModeSingle.
+	Mode FileMode
+
+	// FileFormat controls the file output format. Defaults to FileFormatJSON.
+	FileFormat FileFormat
 
 	// MaxSize is the maximum size in megabytes before rotation.
 	// Defaults to 100 MB if 0.
