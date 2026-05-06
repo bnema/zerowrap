@@ -208,7 +208,7 @@ func NewWithFile(cfg Config, fileCfg FileConfig) (Logger, func(), error) {
 		timeFormat = time.RFC3339
 	}
 
-	// Create multi-writer: console (formatted) + file (JSON)
+	// Create multi-writer: console (formatted) + file (respects FileFormat)
 	var writers []io.Writer
 
 	format := strings.ToLower(cfg.Format)
@@ -221,8 +221,20 @@ func NewWithFile(cfg Config, fileCfg FileConfig) (Logger, func(), error) {
 		writers = append(writers, consoleOutput)
 	}
 
-	// File always gets JSON format for easy parsing
-	writers = append(writers, fileWriter)
+	// File output respects FileFormat: JSON by default, or console (human-readable, no-color).
+	fileOutput := io.Writer(fileWriter)
+	fileFormat := string(fileCfg.FileFormat)
+	if fileFormat == "" {
+		fileFormat = string(FileFormatJSON)
+	}
+	if FileFormat(fileFormat) == FileFormatConsole {
+		fileOutput = zerolog.ConsoleWriter{
+			Out:        fileWriter,
+			TimeFormat: timeFormat,
+			NoColor:    true,
+		}
+	}
+	writers = append(writers, fileOutput)
 
 	multiWriter := zerolog.MultiLevelWriter(writers...)
 

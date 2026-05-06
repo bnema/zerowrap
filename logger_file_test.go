@@ -197,6 +197,73 @@ func TestNewWithFileAppManagedSessionCreatesSharedSessionDirectory(t *testing.T)
 	}
 }
 
+func TestNewWithFileConsoleFileFormatWritesHumanReadableFile(t *testing.T) {
+	base := t.TempDir()
+	fileCfg := FileConfig{
+		Enabled:    true,
+		AppName:    "MyApp",
+		BaseDir:    base,
+		Name:       "app",
+		Mode:       FileModeSingle,
+		FileFormat: FileFormatConsole,
+	}
+
+	expectedPath, err := ResolveLogPath(fileCfg)
+	if err != nil {
+		t.Fatalf("ResolveLogPath returned error: %v", err)
+	}
+
+	log, cleanup, err := NewWithFile(
+		Config{Format: "json"},
+		fileCfg,
+	)
+	if err != nil {
+		t.Fatalf("NewWithFile returned error: %v", err)
+	}
+
+	log.Info().Str("component", "test").Msg("console-file")
+	cleanup()
+
+	content := readFileForTest(t, expectedPath)
+
+	// Must NOT contain JSON-formatted message.
+	if strings.Contains(content, `"message":"console-file"`) {
+		t.Fatalf("file contained JSON message, expected human-readable output. content: %s", content)
+	}
+
+	// Must contain the human-readable message and field.
+	if !strings.Contains(content, "console-file") {
+		t.Fatalf("file did not contain 'console-file', got: %s", content)
+	}
+	if !strings.Contains(content, "component=test") {
+		t.Fatalf("file did not contain 'component=test', got: %s", content)
+	}
+
+	// Must not contain ANSI escape sequences.
+	if strings.Contains(content, "\x1b[") {
+		t.Fatalf("file contained ANSI escape codes, expected no-color output. content: %s", content)
+	}
+}
+
+func TestNewWithFileRejectsInvalidFileFormat(t *testing.T) {
+	base := t.TempDir()
+	_, _, err := NewWithFile(
+		Config{Format: "json"},
+		FileConfig{
+			Enabled:    true,
+			AppName:    "MyApp",
+			BaseDir:    base,
+			FileFormat: FileFormat("text"),
+		},
+	)
+	if err == nil {
+		t.Fatal("expected error for invalid FileFormat")
+	}
+	if !strings.Contains(err.Error(), "FileFormat") {
+		t.Fatalf("error should mention FileFormat, got: %v", err)
+	}
+}
+
 func readFileForTest(t *testing.T, path string) string {
 	t.Helper()
 	data, err := os.ReadFile(path)
