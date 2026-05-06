@@ -99,15 +99,20 @@
 //
 // # FileConfig
 //
-// Configuration for file-based logging with rotation:
+// Configuration for file-based logging with rotation and app-managed paths:
 //
 //	type FileConfig struct {
-//	    Enabled    bool    // toggle file logging
-//	    Path       string  // log file path
-//	    MaxSize    int     // max size in MB before rotation (default: 100)
-//	    MaxBackups int     // max old files to retain (default: 3)
-//	    MaxAge     int     // max days to retain (default: 28)
-//	    Compress   bool    // compress rotated files
+//	    Enabled    bool       // toggle file logging
+//	    Path       string     // full explicit file path override (takes priority when set)
+//	    AppName    string     // enables app-managed log paths when Path is empty
+//	    BaseDir    string     // overrides root directory before AppName when using app-managed paths
+//	    Name       string     // log file name (defaults to "app" with .log extension if missing)
+//	    Mode       FileMode   // app-managed file layout: "single" or "session" (default: "single")
+//	    FileFormat FileFormat // file output format: "json" or "console" (default: "json")
+//	    MaxSize    int        // max size in MB before rotation (default: 100)
+//	    MaxBackups int        // max old files to retain (default: 3)
+//	    MaxAge     int        // max days to retain (default: 28)
+//	    Compress   bool       // compress rotated files
 //	}
 //
 // # Error Helpers
@@ -204,6 +209,39 @@
 //	    panic(err)
 //	}
 //	defer cleanup()
+//
+// # App-Managed File Paths
+//
+// When Path is empty and AppName is set, the library automatically resolves
+// log paths using OS-specific conventions:
+//
+//	Linux:   $XDG_STATE_HOME/<app>/logs/<name>.log (falls back to ~/.local/state)
+//	macOS:   ~/Library/Logs/<app>/<name>.log
+//	Windows: %LOCALAPPDATA%/<app>/Logs/<name>.log
+//
+// The Path field always takes priority as an explicit full-path override.
+// Directories are created automatically for app-managed paths.
+//
+//	cfg := zerowrap.Config{Level: "info", Format: "console"}
+//	fileCfg := zerowrap.FileConfig{
+//	    Enabled:    true,
+//	    AppName:    "MyApp",
+//	    Mode:       zerowrap.FileModeSession,
+//	    FileFormat: zerowrap.FileFormatConsole,
+//	}
+//
+//	path, err := zerowrap.ResolveLogPath(fileCfg)
+//	if err != nil {
+//	    panic(err)
+//	}
+//	_ = path
+//
+//	log, cleanup, err := zerowrap.NewWithFile(cfg, fileCfg)
+//	if err != nil {
+//	    panic(err)
+//	}
+//	defer cleanup()
+//	_ = log
 //
 // # OpenTelemetry Integration
 //
