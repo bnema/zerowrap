@@ -24,6 +24,9 @@ profile.cov
 go.work
 go.work.sum
 
+# Local tool installs
+.bin/
+
 # env file
 .env
 

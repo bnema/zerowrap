@@ -163,7 +163,7 @@ func extractFields(s any) map[string]any {
 	fields := make(map[string]any)
 
 	v := reflect.ValueOf(s)
-	if v.Kind() == reflect.Ptr {
+	if v.Kind() == reflect.Pointer {
 		if v.IsNil() {
 			return fields
 		}
@@ -203,7 +203,7 @@ func extractFields(s any) map[string]any {
 		fieldVal := v.Field(i)
 
 		// Skip zero values for pointers and interfaces
-		if (fieldVal.Kind() == reflect.Ptr || fieldVal.Kind() == reflect.Interface) && fieldVal.IsNil() {
+		if (fieldVal.Kind() == reflect.Pointer || fieldVal.Kind() == reflect.Interface) && fieldVal.IsNil() {
 			continue
 		}
 
