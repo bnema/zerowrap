@@ -1,8 +1,10 @@
 package zerowrap
 
 import (
+	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -152,8 +154,21 @@ func Default() Logger {
 // Returns the logger, a cleanup function that must be called to close the file,
 // and any error encountered.
 func NewWithFile(cfg Config, fileCfg FileConfig) (Logger, func(), error) {
-	if !fileCfg.Enabled || fileCfg.Path == "" {
+	if !fileCfg.Enabled || (fileCfg.Path == "" && fileCfg.AppName == "") {
 		return New(cfg), func() {}, nil
+	}
+
+	appManaged := fileCfg.Path == "" && fileCfg.AppName != ""
+
+	filePath, err := ResolveLogPath(fileCfg)
+	if err != nil {
+		return Logger{}, nil, fmt.Errorf("resolve log path: %w", err)
+	}
+
+	if appManaged {
+		if err := os.MkdirAll(filepath.Dir(filePath), 0o755); err != nil {
+			return Logger{}, nil, fmt.Errorf("create log directory: %w", err)
+		}
 	}
 
 	// Set defaults for file config
@@ -171,7 +186,7 @@ func NewWithFile(cfg Config, fileCfg FileConfig) (Logger, func(), error) {
 	}
 
 	fileWriter := &lumberjack.Logger{
-		Filename:   fileCfg.Path,
+		Filename:   filePath,
 		MaxSize:    maxSize,
 		MaxBackups: maxBackups,
 		MaxAge:     maxAge,

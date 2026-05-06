@@ -108,6 +108,95 @@ func TestNewWithFileExplicitPathWinsOverAppName(t *testing.T) {
 	}
 }
 
+func TestNewWithFileAppManagedSingleCreatesDirectoryAndWritesFile(t *testing.T) {
+	base := t.TempDir()
+	fileCfg := FileConfig{
+		Enabled: true,
+		AppName: "MyApp",
+		BaseDir: base,
+		Name:    "app",
+		Mode:    FileModeSingle,
+	}
+
+	expectedPath, err := ResolveLogPath(fileCfg)
+	if err != nil {
+		t.Fatalf("ResolveLogPath returned error: %v", err)
+	}
+
+	log, cleanup, err := NewWithFile(
+		Config{Format: "json"},
+		fileCfg,
+	)
+	if err != nil {
+		t.Fatalf("NewWithFile returned error: %v", err)
+	}
+
+	log.Info().Msg("managed")
+	cleanup()
+
+	content := readFileForTest(t, expectedPath)
+	if !strings.Contains(content, `"message":"managed"`) {
+		t.Fatalf("file %q did not contain expected message, got: %s", expectedPath, content)
+	}
+}
+
+func TestNewWithFileAppManagedSessionCreatesSharedSessionDirectory(t *testing.T) {
+	base := t.TempDir()
+
+	appCfg := FileConfig{
+		Enabled: true,
+		AppName: "MyApp",
+		BaseDir: base,
+		Name:    "app",
+		Mode:    FileModeSession,
+	}
+	dbCfg := FileConfig{
+		Enabled: true,
+		AppName: "MyApp",
+		BaseDir: base,
+		Name:    "database",
+		Mode:    FileModeSession,
+	}
+
+	appPath, err := ResolveLogPath(appCfg)
+	if err != nil {
+		t.Fatalf("ResolveLogPath for app returned error: %v", err)
+	}
+	dbPath, err := ResolveLogPath(dbCfg)
+	if err != nil {
+		t.Fatalf("ResolveLogPath for database returned error: %v", err)
+	}
+
+	if filepath.Dir(appPath) != filepath.Dir(dbPath) {
+		t.Fatalf("expected same session directory, got app=%q db=%q", filepath.Dir(appPath), filepath.Dir(dbPath))
+	}
+
+	appLog, appCleanup, err := NewWithFile(Config{Format: "json"}, appCfg)
+	if err != nil {
+		t.Fatalf("NewWithFile for app returned error: %v", err)
+	}
+	dbLog, dbCleanup, err := NewWithFile(Config{Format: "json"}, dbCfg)
+	if err != nil {
+		t.Fatalf("NewWithFile for database returned error: %v", err)
+	}
+
+	appLog.Info().Msg("app-message")
+	dbLog.Info().Msg("database-message")
+
+	appCleanup()
+	dbCleanup()
+
+	appContent := readFileForTest(t, appPath)
+	if !strings.Contains(appContent, `"message":"app-message"`) {
+		t.Fatalf("app file %q did not contain expected message, got: %s", appPath, appContent)
+	}
+
+	dbContent := readFileForTest(t, dbPath)
+	if !strings.Contains(dbContent, `"message":"database-message"`) {
+		t.Fatalf("database file %q did not contain expected message, got: %s", dbPath, dbContent)
+	}
+}
+
 func readFileForTest(t *testing.T, path string) string {
 	t.Helper()
 	data, err := os.ReadFile(path)
