@@ -228,6 +228,49 @@ func TestResolveLogPathLinuxFallsBackToDotLocal(t *testing.T) {
 	}
 }
 
+func TestResolveLogPathSessionUsesSharedProcessSessionID(t *testing.T) {
+	base := t.TempDir()
+
+	appPath, err := ResolveLogPath(FileConfig{
+		Enabled: true,
+		AppName: "MyApp",
+		BaseDir: base,
+		Name:    "app",
+		Mode:    FileModeSession,
+	})
+	if err != nil {
+		t.Fatalf("ResolveLogPath app returned error: %v", err)
+	}
+
+	dbPath, err := ResolveLogPath(FileConfig{
+		Enabled: true,
+		AppName: "MyApp",
+		BaseDir: base,
+		Name:    "database",
+		Mode:    FileModeSession,
+	})
+	if err != nil {
+		t.Fatalf("ResolveLogPath database returned error: %v", err)
+	}
+
+	appDir := filepath.Dir(appPath)
+	dbDir := filepath.Dir(dbPath)
+	if appDir != dbDir {
+		t.Fatalf("session dirs differ: app=%q db=%q", appDir, dbDir)
+	}
+
+	wantPrefix := filepath.Join(base, "MyApp", "logs", "sessions") + string(filepath.Separator)
+	if !strings.HasPrefix(appDir, wantPrefix) {
+		t.Fatalf("session dir = %q, want prefix %q", appDir, wantPrefix)
+	}
+	if filepath.Base(appPath) != "app.log" {
+		t.Fatalf("app file = %q, want app.log", filepath.Base(appPath))
+	}
+	if filepath.Base(dbPath) != "database.log" {
+		t.Fatalf("database file = %q, want database.log", filepath.Base(dbPath))
+	}
+}
+
 func TestResolveLogPathDefaultRootIsNotEmpty(t *testing.T) {
 	// App-managed without BaseDir must resolve to a non-empty root on every OS.
 	p, err := ResolveLogPath(FileConfig{AppName: "MyApp"})
