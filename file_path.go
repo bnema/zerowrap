@@ -71,14 +71,9 @@ func ResolveLogPath(fileCfg FileConfig) (string, error) {
 		return "", fmt.Errorf("invalid FileMode: %q (must be %q or %q)", mode, FileModeSingle, FileModeSession)
 	}
 
-	fileFormat := fileCfg.FileFormat
-	if fileFormat == "" {
-		fileFormat = FileFormatJSON
-	}
-	switch fileFormat {
-	case FileFormatJSON, FileFormatConsole:
-	default:
-		return "", fmt.Errorf("invalid FileFormat: %q (must be %q or %q)", fileFormat, FileFormatJSON, FileFormatConsole)
+	_, err := normalizeFileFormat(fileCfg.FileFormat)
+	if err != nil {
+		return "", err
 	}
 
 	root, err := resolveLogRoot(fileCfg)
@@ -142,4 +137,18 @@ func validateComponent(s, fieldName string) error {
 		return fmt.Errorf("%s must not contain path separators, got %q", fieldName, s)
 	}
 	return nil
+}
+
+// normalizeFileFormat validates and defaults the FileFormat value.
+// Returns the normalized format and an error if the value is invalid.
+func normalizeFileFormat(f FileFormat) (FileFormat, error) {
+	if f == "" {
+		return FileFormatJSON, nil
+	}
+	switch f {
+	case FileFormatJSON, FileFormatConsole:
+		return f, nil
+	default:
+		return "", fmt.Errorf("invalid FileFormat: %q (must be %q or %q)", f, FileFormatJSON, FileFormatConsole)
+	}
 }

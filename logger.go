@@ -158,16 +158,21 @@ func NewWithFile(cfg Config, fileCfg FileConfig) (Logger, func(), error) {
 		return New(cfg), func() {}, nil
 	}
 
+	fileFormat, err := normalizeFileFormat(fileCfg.FileFormat)
+	if err != nil {
+		return Logger{}, func() {}, fmt.Errorf("file format: %w", err)
+	}
+
 	appManaged := fileCfg.Path == "" && fileCfg.AppName != ""
 
 	filePath, err := ResolveLogPath(fileCfg)
 	if err != nil {
-		return Logger{}, nil, fmt.Errorf("resolve log path: %w", err)
+		return Logger{}, func() {}, fmt.Errorf("resolve log path: %w", err)
 	}
 
 	if appManaged {
 		if err := os.MkdirAll(filepath.Dir(filePath), 0o755); err != nil {
-			return Logger{}, nil, fmt.Errorf("create log directory: %w", err)
+			return Logger{}, func() {}, fmt.Errorf("create log directory: %w", err)
 		}
 	}
 
@@ -223,11 +228,7 @@ func NewWithFile(cfg Config, fileCfg FileConfig) (Logger, func(), error) {
 
 	// File output respects FileFormat: JSON by default, or console (human-readable, no-color).
 	fileOutput := io.Writer(fileWriter)
-	fileFormat := string(fileCfg.FileFormat)
-	if fileFormat == "" {
-		fileFormat = string(FileFormatJSON)
-	}
-	if FileFormat(fileFormat) == FileFormatConsole {
+	if fileFormat == FileFormatConsole {
 		fileOutput = zerolog.ConsoleWriter{
 			Out:        fileWriter,
 			TimeFormat: timeFormat,

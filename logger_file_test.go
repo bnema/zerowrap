@@ -247,7 +247,7 @@ func TestNewWithFileConsoleFileFormatWritesHumanReadableFile(t *testing.T) {
 
 func TestNewWithFileRejectsInvalidFileFormat(t *testing.T) {
 	base := t.TempDir()
-	_, _, err := NewWithFile(
+	_, cleanup, err := NewWithFile(
 		Config{Format: "json"},
 		FileConfig{
 			Enabled:    true,
@@ -262,6 +262,34 @@ func TestNewWithFileRejectsInvalidFileFormat(t *testing.T) {
 	if !strings.Contains(err.Error(), "FileFormat") {
 		t.Fatalf("error should mention FileFormat, got: %v", err)
 	}
+	if cleanup == nil {
+		t.Fatal("expected non-nil cleanup on error")
+	}
+	// cleanup must be callable without panicking.
+	cleanup()
+}
+
+func TestNewWithFileRejectsInvalidFileFormatExplicitPath(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "test.log")
+	_, cleanup, err := NewWithFile(
+		Config{Format: "json"},
+		FileConfig{
+			Enabled:    true,
+			Path:       path,
+			FileFormat: FileFormat("text"),
+		},
+	)
+	if err == nil {
+		t.Fatal("expected error for invalid FileFormat with explicit Path")
+	}
+	if !strings.Contains(err.Error(), "FileFormat") {
+		t.Fatalf("error should mention FileFormat, got: %v", err)
+	}
+	if cleanup == nil {
+		t.Fatal("expected non-nil cleanup on error")
+	}
+	// cleanup must be callable without panicking.
+	cleanup()
 }
 
 func readFileForTest(t *testing.T, path string) string {
