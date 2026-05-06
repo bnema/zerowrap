@@ -245,7 +245,7 @@ func connectToHost(ctx context.Context, host string) error {
 ### App-Managed File Logging
 
 When you don't want to hard-code a full file path, set `AppName` and let zerowrap
-choose the correct OS-specific log directory:
+choose the standard OS-specific log directory:
 
 ```go
 fileCfg := zerowrap.FileConfig{
@@ -295,7 +295,8 @@ defer cleanup()
 | `FileFormatConsole` | Human-readable text without ANSI colors. Useful for local apps, CLI tools, and support logs. |
 
 When both `Path` and `AppName` are set, `Path` takes priority. Set `BaseDir` to
-relocate the app root while keeping the standard layout.
+relocate the app root while keeping the standard layout. For example,
+`BaseDir: "/tmp"` with `AppName: "MyApp"` resolves under `/tmp/MyApp/logs/`.
 
 ### OpenTelemetry Integration
 

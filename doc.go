@@ -215,12 +215,17 @@
 // When Path is empty and AppName is set, the library automatically resolves
 // log paths using OS-specific conventions:
 //
-//	Linux:   $XDG_STATE_HOME/<app>/logs/<name>.log (falls back to ~/.local/state)
+//	Linux:   $XDG_STATE_HOME/<app>/logs/<name>.log (falls back to ~/.local/state/<app>/logs/<name>.log)
 //	macOS:   ~/Library/Logs/<app>/<name>.log
-//	Windows: %LOCALAPPDATA%/<app>/Logs/<name>.log
+//	Windows: %LOCALAPPDATA%\<app>\Logs\<name>.log
 //
 // The Path field always takes priority as an explicit full-path override.
 // Directories are created automatically for app-managed paths.
+//
+//	FileModeSingle writes <root>/<name>.log.
+//	FileModeSession writes <root>/sessions/<session-id>/<name>.log and
+//	shares the session directory across loggers in the same process.
+//	FileFormatConsole writes human-readable file output without ANSI colors.
 //
 //	cfg := zerowrap.Config{Level: "info", Format: "console"}
 //	fileCfg := zerowrap.FileConfig{
