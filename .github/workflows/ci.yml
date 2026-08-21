@@ -27,6 +27,6 @@ jobs:
     name: Go
     uses: bnema/gh-actions/.github/workflows/go-ci.yml@main
     with:
-      go-version: '1.25'
+      go-version: '1.27'
       lint-command: make lint
       test-command: make test

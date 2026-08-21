@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/rs/zerolog"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/log"
 	"go.opentelemetry.io/otel/log/global"
 )
@@ -41,7 +42,7 @@ func (h *Hook) Run(e *zerolog.Event, level zerolog.Level, msg string) {
 	}
 
 	var record log.Record
-	record.SetBody(log.StringValue(msg))
+	record.SetBody(attribute.StringValue(msg))
 	record.SetSeverity(levelToOTel(level))
 	record.SetSeverityText(level.String())
 
