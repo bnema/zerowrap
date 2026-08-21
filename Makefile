@@ -1,4 +1,4 @@
-GOLANGCI_LINT_VERSION ?= latest
+GOLANGCI_LINT_VERSION ?= v2.13.1
 LOCAL_BIN ?= $(CURDIR)/.bin
 GOLANGCI_LINT := $(shell command -v golangci-lint 2>/dev/null)
 GO_TEST_FLAGS ?= -race -v ./...
@@ -26,4 +26,4 @@ clean:
 
 $(LOCAL_BIN)/golangci-lint:
 	mkdir -p $(LOCAL_BIN)
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(LOCAL_BIN) $(GOLANGCI_LINT_VERSION)
+	GOBIN=$(LOCAL_BIN) go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
