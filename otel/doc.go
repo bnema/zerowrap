@@ -6,8 +6,8 @@
 // # Usage
 //
 //	import (
-//	    "github.com/bnema/zerowrap"
-//	    "github.com/bnema/zerowrap/otel"
+//	    "bnema.dev/zerowrap"
+//	    "bnema.dev/zerowrap/otel"
 //	)
 //
 //	// Create logger with OTel hook

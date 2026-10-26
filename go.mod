@@ -1,4 +1,4 @@
-module github.com/bnema/zerowrap
+module bnema.dev/zerowrap
 
 go 1.27
 

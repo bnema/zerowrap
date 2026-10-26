@@ -5,13 +5,13 @@ A reusable Go package that wraps [zerolog](https://github.com/rs/zerolog) with c
 ## Installation
 
 ```bash
-go get github.com/bnema/zerowrap
+go get bnema.dev/zerowrap
 ```
 
 For OpenTelemetry integration (optional):
 
 ```bash
-go get github.com/bnema/zerowrap/otel
+go get bnema.dev/zerowrap/otel
 ```
 
 ## Quick Start
@@ -21,7 +21,7 @@ package main
 
 import (
     "context"
-    "github.com/bnema/zerowrap"
+    "bnema.dev/zerowrap"
 )
 
 func main() {
@@ -306,8 +306,8 @@ should switch to keyed literals.
 
 ```go
 import (
-    "github.com/bnema/zerowrap"
-    "github.com/bnema/zerowrap/otel"
+    "bnema.dev/zerowrap"
+    "bnema.dev/zerowrap/otel"
 )
 
 // Using global provider

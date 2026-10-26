@@ -254,7 +254,7 @@
 //
 // For OpenTelemetry log bridging, use the optional otel sub-package:
 //
-//	import "github.com/bnema/zerowrap/otel"
+//	import "bnema.dev/zerowrap/otel"
 //
 //	// Using global provider
 //	log := zerowrap.New(cfg).Hook(otel.NewHook("my-service"))
