@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/rs/zerolog"
+	otelapi "go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/log"
-	"go.opentelemetry.io/otel/log/global"
 )
 
 // Hook is a zerolog.Hook that bridges logs to OpenTelemetry.
@@ -18,7 +18,7 @@ type Hook struct {
 // Uses the global logger provider.
 func NewHook(serviceName string) *Hook {
 	return &Hook{
-		logger: global.GetLoggerProvider().Logger(serviceName),
+		logger: otelapi.GetLoggerProvider().Logger(serviceName),
 	}
 }
 
